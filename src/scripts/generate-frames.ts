@@ -12,9 +12,7 @@ async function generateFrames() {
     </svg>
   `);
 
-  await sharp(frame1)
-    .png()
-    .toFile(path.join(publicDir, 'frame1.png'));
+  await sharp(frame1).png().toFile(path.join(publicDir, 'frame1.png'));
 
   // Create frame 2 - a decorative frame
   const frame2 = Buffer.from(`
@@ -30,9 +28,7 @@ async function generateFrames() {
     </svg>
   `);
 
-  await sharp(frame2)
-    .png()
-    .toFile(path.join(publicDir, 'frame2.png'));
+  await sharp(frame2).png().toFile(path.join(publicDir, 'frame2.png'));
 }
 
 generateFrames().catch(console.error);

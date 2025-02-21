@@ -13,8 +13,6 @@ export default function Home() {
     if (!file) return;
 
     setIsLoading(true);
-
-    // Create a FormData object to send the file
     const formData = new FormData();
     formData.append('image', file);
 
@@ -24,9 +22,7 @@ export default function Home() {
         body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to process image');
-      }
+      if (!response.ok) throw new Error('Failed to process image');
 
       const data = await response.json();
       setProcessedImages(data.processedImages);
@@ -36,6 +32,24 @@ export default function Home() {
       alert('Failed to process image. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDownload = async (imageUrl: string, filename: string) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      alert('Failed to download image. Please try again.');
     }
   };
 
@@ -74,20 +88,32 @@ export default function Home() {
                     className="object-contain"
                   />
                 </div>
+                <button
+                  onClick={() => handleDownload(uploadedImage, 'original.jpg')}
+                  className="mt-4 w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                >
+                  Download Original
+                </button>
               </div>
             )}
 
             {processedImages.map((image, index) => (
               <div key={index} className="border p-4 rounded-lg">
-                <h2 className="text-lg font-semibold mb-2">Processed Image {index + 1}</h2>
+                <h2 className="text-lg font-semibold mb-2">Frame {index + 1}</h2>
                 <div className="relative aspect-square">
                   <Image
                     src={image}
-                    alt={`Processed image ${index + 1}`}
+                    alt={`Frame ${index + 1}`}
                     fill
                     className="object-contain"
                   />
                 </div>
+                <button
+                  onClick={() => handleDownload(image, `frame-${index + 1}.jpg`)}
+                  className="mt-4 w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                >
+                  Download Frame {index + 1}
+                </button>
               </div>
             ))}
           </div>

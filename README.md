@@ -15,11 +15,13 @@ A Next.js application for generating framed images. Upload an image and get two 
 ## Getting Started
 
 1. Install dependencies:
+
    ```bash
    yarn install
    ```
 
 2. Run the development server:
+
    ```bash
    yarn dev
    ```

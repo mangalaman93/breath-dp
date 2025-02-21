@@ -3,16 +3,24 @@
 import { useState } from 'react';
 import Image from 'next/image';
 
+type ImageState = {
+  url: string | null;
+  processed: string[];
+  isLoading: boolean;
+};
+
 export default function Home() {
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [processedImages, setProcessedImages] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [imageState, setImageState] = useState<ImageState>({
+    url: null,
+    processed: [],
+    isLoading: false,
+  });
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setIsLoading(true);
+    setImageState((prev) => ({ ...prev, isLoading: true }));
     const formData = new FormData();
     formData.append('image', file);
 
@@ -25,19 +33,22 @@ export default function Home() {
       if (!response.ok) throw new Error('Failed to process image');
 
       const data = await response.json();
-      setProcessedImages(data.processedImages);
-      setUploadedImage(URL.createObjectURL(file));
+      setImageState({
+        url: URL.createObjectURL(file),
+        processed: data.processedImages,
+        isLoading: false,
+      });
     } catch (error) {
       console.error('Error processing image:', error);
       alert('Failed to process image. Please try again.');
-    } finally {
-      setIsLoading(false);
+      setImageState((prev) => ({ ...prev, isLoading: false }));
     }
   };
 
-  const handleDownload = async (imageUrl: string, filename: string) => {
+  const handleDownload = async (dataUrl: string, filename: string) => {
     try {
-      const response = await fetch(imageUrl);
+      // For base64 data URLs, we can create the blob directly
+      const response = await fetch(dataUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -66,30 +77,30 @@ export default function Home() {
               className="hidden"
               accept="image/*"
               onChange={handleImageUpload}
-              disabled={isLoading}
+              disabled={imageState.isLoading}
             />
           </label>
 
-          {isLoading && (
+          {imageState.isLoading && (
             <div className="text-center">
               <p>Processing image...</p>
             </div>
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
-            {uploadedImage && (
+            {imageState.url && (
               <div className="border p-4 rounded-lg">
                 <h2 className="text-lg font-semibold mb-2">Original Image</h2>
                 <div className="relative aspect-square">
                   <Image
-                    src={uploadedImage}
-                    alt="Uploaded image"
+                    src={imageState.url}
+                    alt="Original image"
                     fill
                     className="object-contain"
                   />
                 </div>
                 <button
-                  onClick={() => handleDownload(uploadedImage, 'original.jpg')}
+                  onClick={() => handleDownload(imageState.url!, 'original.png')}
                   className="mt-4 w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
                 >
                   Download Original
@@ -97,7 +108,7 @@ export default function Home() {
               </div>
             )}
 
-            {processedImages.map((image, index) => (
+            {imageState.processed.map((image, index) => (
               <div key={index} className="border p-4 rounded-lg">
                 <h2 className="text-lg font-semibold mb-2">Frame {index + 1}</h2>
                 <div className="relative aspect-square">
@@ -106,10 +117,11 @@ export default function Home() {
                     alt={`Frame ${index + 1}`}
                     fill
                     className="object-contain"
+                    unoptimized // Required for base64 images
                   />
                 </div>
                 <button
-                  onClick={() => handleDownload(image, `frame-${index + 1}.jpg`)}
+                  onClick={() => handleDownload(image, `breath-dp${index + 1}.png`)}
                   className="mt-4 w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
                 >
                   Download Frame {index + 1}

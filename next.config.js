@@ -11,7 +11,7 @@ const nextConfig = {
     ],
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: true, // Keep ESLint disabled until we resolve the config issue
   },
   output: 'standalone',
 };

@@ -1,5 +1,5 @@
+import sharp from 'sharp';
 import { NextRequest, NextResponse } from 'next/server';
-import * as sharp from 'sharp';
 import * as path from 'path';
 
 export async function POST(request: NextRequest) {
@@ -16,14 +16,19 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes);
 
     // Create a white background image
-    const whiteBackground = await sharp({
-      create: {
-        width: 800,
-        height: 800,
-        channels: 4,
-        background: { r: 255, g: 255, b: 255, alpha: 1 }
-      }
-    }).png().toBuffer();
+    const whiteBackground = await sharp()
+      .composite([{
+        input: {
+          create: {
+            width: 800,
+            height: 800,
+            channels: 4,
+            background: { r: 255, g: 255, b: 255, alpha: 1 }
+          }
+        }
+      }])
+      .png()
+      .toBuffer();
 
     // Process frame 1
     const frame1 = await sharp(buffer)

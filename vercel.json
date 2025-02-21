@@ -1,5 +1,3 @@
 {
-  "buildCommand": "yarn install --ignore-engines --ignore-platform && yarn build",
-  "installCommand": "yarn install --ignore-engines --ignore-platform",
   "framework": "nextjs"
 }

@@ -16,26 +16,61 @@ export default function Home() {
     isLoading: false,
   });
 
+  const processImage = async (file: File): Promise<string[]> => {
+    return new Promise((resolve) => {
+      const img = document.createElement('img');
+      img.onload = () => {
+        // Create canvas for processing
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d')!;
+
+        // Set canvas size to 800x800
+        canvas.width = 800;
+        canvas.height = 800;
+
+        // Calculate scaling to fit image within 800x800 while maintaining aspect ratio
+        const scale = Math.min(800 / img.width, 800 / img.height);
+        const x = (800 - img.width * scale) / 2;
+        const y = (800 - img.height * scale) / 2;
+
+        // Process frames
+        const frames: string[] = [];
+
+        // Frame 1: White background with centered image
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, 800, 800);
+        ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+        frames.push(canvas.toDataURL('image/png'));
+
+        // Frame 2: White background with image at top
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, 800, 800);
+        ctx.drawImage(img, x, 0, img.width * scale, img.height * scale);
+        frames.push(canvas.toDataURL('image/png'));
+
+        // Frame 3: White background with image at bottom
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, 800, 800);
+        ctx.drawImage(img, x, 800 - img.height * scale, img.width * scale, img.height * scale);
+        frames.push(canvas.toDataURL('image/png'));
+
+        resolve(frames);
+      };
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setImageState((prev) => ({ ...prev, isLoading: true }));
-    const formData = new FormData();
-    formData.append('image', file);
 
     try {
-      const response = await fetch('/api/process-image', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) throw new Error('Failed to process image');
-
-      const data = await response.json();
+      const processedImages = await processImage(file);
       setImageState({
         url: URL.createObjectURL(file),
-        processed: data.processedImages,
+        processed: processedImages,
         isLoading: false,
       });
     } catch (error) {
@@ -47,17 +82,12 @@ export default function Home() {
 
   const handleDownload = async (dataUrl: string, filename: string) => {
     try {
-      // For base64 data URLs, we can create the blob directly
-      const response = await fetch(dataUrl);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = url;
+      link.href = dataUrl;
       link.download = filename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error downloading image:', error);
       alert('Failed to download image. Please try again.');
@@ -97,6 +127,7 @@ export default function Home() {
                     alt="Original image"
                     fill
                     className="object-contain"
+                    unoptimized
                   />
                 </div>
                 <button
@@ -117,7 +148,7 @@ export default function Home() {
                     alt={`Frame ${index + 1}`}
                     fill
                     className="object-contain"
-                    unoptimized // Required for base64 images
+                    unoptimized
                   />
                 </div>
                 <button

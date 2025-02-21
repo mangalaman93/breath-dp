@@ -1,0 +1,5 @@
+{
+  "buildCommand": "yarn install --ignore-engines && yarn build",
+  "installCommand": "yarn install --ignore-engines",
+  "framework": "nextjs"
+}

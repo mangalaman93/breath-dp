@@ -25,91 +25,6 @@ const createCanvas = (
   return [canvas, ctx];
 };
 
-const drawGradientFrame = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-  // Create gradient background
-  const gradient = ctx.createLinearGradient(0, 0, width, height);
-  gradient.addColorStop(0, '#f0f9ff');
-  gradient.addColorStop(1, '#e0f2fe');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, width, height);
-
-  // Add header background
-  const headerGradient = ctx.createLinearGradient(0, 0, width, 120);
-  headerGradient.addColorStop(0, '#3b82f6');
-  headerGradient.addColorStop(1, '#2563eb');
-  ctx.fillStyle = headerGradient;
-  ctx.fillRect(0, 0, width, 120);
-
-  // Add decorative line under header
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(40, 110);
-  ctx.lineTo(width - 40, 110);
-  ctx.stroke();
-
-  // Add header text
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 48px system-ui';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('BREATH DP', width / 2, 60);
-
-  // Add decorative circles with gradient
-  const circle1Gradient = ctx.createRadialGradient(100, 100, 0, 100, 100, 80);
-  circle1Gradient.addColorStop(0, 'rgba(191, 219, 254, 0.4)');
-  circle1Gradient.addColorStop(1, 'rgba(191, 219, 254, 0.1)');
-  ctx.fillStyle = circle1Gradient;
-  ctx.beginPath();
-  ctx.arc(100, 100, 80, 0, Math.PI * 2);
-  ctx.fill();
-
-  const circle2Gradient = ctx.createRadialGradient(
-    width - 100,
-    height - 100,
-    0,
-    width - 100,
-    height - 100,
-    120
-  );
-  circle2Gradient.addColorStop(0, 'rgba(191, 219, 254, 0.4)');
-  circle2Gradient.addColorStop(1, 'rgba(191, 219, 254, 0.1)');
-  ctx.fillStyle = circle2Gradient;
-  ctx.beginPath();
-  ctx.arc(width - 100, height - 100, 120, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Add subtle texture
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
-  for (let i = 0; i < width; i += 20) {
-    for (let j = 150; j < height; j += 20) {
-      if (Math.random() > 0.5) {
-        ctx.fillRect(i, j, 2, 2);
-      }
-    }
-  }
-};
-
-const drawPatternFrame = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, width, height);
-
-  // Modern dot pattern
-  ctx.fillStyle = '#f1f5f9';
-  for (let x = 0; x < width; x += 30) {
-    for (let y = 0; y < height; y += 30) {
-      ctx.beginPath();
-      ctx.arc(x, y, 3, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-
-  // Subtle border
-  ctx.strokeStyle = '#e2e8f0';
-  ctx.lineWidth = 20;
-  ctx.strokeRect(10, 10, width - 20, height - 20);
-};
-
 export default function Home() {
   const [imageState, setImageState] = useState<ImageState>({
     frames: [],
@@ -119,36 +34,44 @@ export default function Home() {
   const processImage = async (file: File): Promise<Frame[]> => {
     return new Promise((resolve) => {
       const img = document.createElement('img');
-      img.onload = () => {
+      img.onload = async () => {
         const [canvas, ctx] = createCanvas(800, 800);
 
-        // Calculate scaling to fit image within 700x700 (leaving room for decoration)
-        const scale = Math.min(600 / img.width, 600 / img.height);
+        // Calculate scaling to fit image within the frame's empty space
+        const framePadding = 50; // Adjust based on your frame's empty space
+        const maxWidth = canvas.width - framePadding * 2;
+        const maxHeight = canvas.height - framePadding * 2;
+        const scale = Math.min(maxWidth / img.width, maxHeight / img.height);
         const scaledWidth = img.width * scale;
         const scaledHeight = img.height * scale;
-        const x = (800 - scaledWidth) / 2;
-        const y = (800 - scaledHeight) / 2 + 60; // Move image down to accommodate header
+        const x = (canvas.width - scaledWidth) / 2;
+        const y = (canvas.height - scaledHeight) / 2;
 
-        // Frame 1: Gradient background
-        drawGradientFrame(ctx, canvas.width, canvas.height);
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
-        ctx.shadowBlur = 25;
-        ctx.shadowOffsetY = 15;
+        // Draw the user-uploaded image first
         ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+
+        // Frame 1: breath-frame
+        const breathFrame = document.createElement('img');
+        await new Promise<void>((resolve) => {
+          breathFrame.onload = () => resolve();
+          breathFrame.src = '/breath-frame.png';
+        });
+        ctx.drawImage(breathFrame, 0, 0, canvas.width, canvas.height);
         const frame1 = {
           dataUrl: canvas.toDataURL('image/png'),
-          name: 'breath-dp-gradient.png',
+          name: 'breath-dp.png',
         };
 
-        // Reset shadow and create Frame 2: Pattern background
-        ctx.shadowColor = 'transparent';
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetY = 0;
-        drawPatternFrame(ctx, canvas.width, canvas.height);
-        ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+        // Frame 2: shwas-frame
+        const shwasFrame = document.createElement('img');
+        await new Promise<void>((resolve) => {
+          shwasFrame.onload = () => resolve();
+          shwasFrame.src = '/shwas-frame.png';
+        });
+        ctx.drawImage(shwasFrame, 0, 0, canvas.width, canvas.height);
         const frame2 = {
           dataUrl: canvas.toDataURL('image/png'),
-          name: 'breath-dp-pattern.png',
+          name: 'shwas-dp.png',
         };
 
         resolve([frame1, frame2]);
@@ -190,7 +113,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-8">
       <main className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">Breath DP Generator</h1>
+        <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">DP Generator</h1>
 
         <div className="flex flex-col items-center gap-8">
           <label className="cursor-pointer bg-blue-500 hover:bg-blue-600 transition-colors duration-200 text-white px-8 py-4 rounded-lg shadow-lg hover:shadow-xl">
@@ -217,7 +140,7 @@ export default function Home() {
                 className="border border-gray-200 bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-200"
               >
                 <h2 className="text-xl font-semibold mb-4 text-gray-700">
-                  {index === 0 ? 'Gradient Frame' : 'Pattern Frame'}
+                  {index === 0 ? 'Breath Frame' : 'Shwas Frame'}
                 </h2>
                 <div className="relative aspect-square rounded-lg overflow-hidden">
                   <Image

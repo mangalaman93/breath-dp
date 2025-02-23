@@ -1,4 +1,4 @@
-# Breath DP Generator
+# DP Generator
 
 A Next.js application for generating framed images. Upload an image and get two beautifully framed versions.
 

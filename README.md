@@ -6,11 +6,11 @@ A Next.js application for generating framed images. Upload an image and get two 
 
 - Image upload and processing
 - Two frame styles:
-  - Simple border frame
-  - Decorative frame with corner accents
+  - Breath Frame
+  - Shwas Frame
 - Download processed images
 - Responsive design
-- Built with Next.js and Sharp
+- Built with Next.js and TailwindCSS
 
 ## Getting Started
 
@@ -26,7 +26,11 @@ A Next.js application for generating framed images. Upload an image and get two 
    yarn dev
    ```
 
-3. Open [http://localhost:3000](http://localhost:3000) in your browser.
+3. Open [http://localhost:3000](http://localhost:3000) in your browser to view the app.
+
+## Deployment
+
+To deploy this project, follow the [Next.js deployment documentation](https://nextjs.org/docs/deployment).
 
 ## Available Scripts
 

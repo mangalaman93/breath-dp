@@ -3,9 +3,9 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'DP Generator',
-  description: 'Generate beautifully framed images with elegant borders',
+  description: 'Generate Breath DP photos',
   applicationName: 'DP Generator',
-  authors: [{ name: 'DP Generator Team' }],
+  authors: [{ name: 'Aman Mangal' }],
   keywords: ['image', 'frame', 'generator', 'photo', 'border'],
 };
 

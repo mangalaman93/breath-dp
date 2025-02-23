@@ -37,11 +37,11 @@ export default function Home() {
       img.onload = async () => {
         const [canvas, ctx] = createCanvas(800, 800);
 
-        // Calculate scaling to fit image within the frame's empty space
+        // Calculate scaling to cover the frame's empty space
         const framePadding = 50; // Adjust based on your frame's empty space
         const maxWidth = canvas.width - framePadding * 2;
         const maxHeight = canvas.height - framePadding * 2;
-        const scale = Math.min(maxWidth / img.width, maxHeight / img.height);
+        const scale = Math.max(maxWidth / img.width, maxHeight / img.height);
         const scaledWidth = img.width * scale;
         const scaledHeight = img.height * scale;
         const x = (canvas.width - scaledWidth) / 2;
